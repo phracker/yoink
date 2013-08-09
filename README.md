@@ -2,15 +2,14 @@
 
 *A Freeleech Torrent Grabber for What.CD*
 ---
-Usage: `$ python yoink.py`
 
-On the initial run, a file called `~/.yoinkrc` will be generated.
-
-Edit this file to include the proper information, then re-run `$ python yoink.py`
-
->Prereqs: python 2.7 and pip to start, then:
+>Requires python2.7 + pip + `$ pip install json requests HTMLParser`
 >
->`$ pip install json requests HTMLParser`
+>Usage: `$ python yoink.py`
+>
+>On the initial run, a file called `~/.yoinkrc` will be generated.
+>
+>Edit this file to include the proper information, then re-run `$ python yoink.py`
 >
 >To create a cron job that executes this script every hour, simply:
 >
