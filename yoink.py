@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import cPickle as pickle
 import json
 import requests
 import HTMLParser
@@ -71,10 +72,20 @@ def main():
 
   s = requests.session()
 
-  r = s.post('https://what.cd/login.php', data={'username': user, 'password': password})
+  cookiefile = os.path.expanduser('~/.yoink.dat')
+  if os.path.exists(cookiefile):
+    with open(cookiefile, 'r') as f:
+      s.cookies = pickle.load(f)
+
+  r = s.get('https://what.cd/login.php')
   if r.url != u'https://what.cd/index.php':
-    print "Login failed - come on, you're looking right at your password!"
-    return
+    r = s.post('https://what.cd/login.php', data={'username': user, 'password': password})
+    if r.url != u'https://what.cd/index.php':
+      print "Login failed - come on, you're looking right at your password!"
+      return
+
+  with open(cookiefile, 'w') as f:
+    pickle.dump(s.cookies, f)
 
   page = 1
   while True:
