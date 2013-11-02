@@ -16,6 +16,10 @@ target = ''
 
 defaultrc=["user:",'\n',"password:",'\n',"target:"]
 
+headers = {
+  'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9) AppleWebKit/537.71 (KHTML, like Gecko) Version/7.0 Safari/537.71'
+}
+
 def download_torrent(session, tid, name):
   if not os.path.exists(target):
     print 'Target Directory does not exist, creating...'
@@ -27,12 +31,12 @@ def download_torrent(session, tid, name):
     return
 
   if not hasattr(download_torrent, 'authdata'):
-    r = session.get('https://what.cd/ajax.php?action=index')
+    r = session.get('https://what.cd/ajax.php?action=index', headers=headers)
     d = json.loads(r.content)
     download_torrent.authdata = '&authkey={}&torrent_pass={}'.format(d['response']['authkey'], d['response']['passkey'])
 
   print '{}:'.format(tid),
-  dl = session.get('https://what.cd/torrents.php?action=download&id={}{}'.format(tid, download_torrent.authdata))
+  dl = session.get('https://what.cd/torrents.php?action=download&id={}{}'.format(tid, download_torrent.authdata), headers=headers)
   with open(path, 'wb') as f:
     for chunk in dl.iter_content(1024*1024):
       f.write(chunk)
@@ -71,14 +75,14 @@ def main():
 
   s = requests.session()
 
-  r = s.post('https://what.cd/login.php', data={'username': user, 'password': password})
+  r = s.post('https://what.cd/login.php', data={'username': user, 'password': password}, headers=headers)
   if r.url != u'https://what.cd/index.php':
     print "Login failed - come on, you're looking right at your password!"
     return
 
   page = 1
   while True:
-    r = s.get('https://what.cd/ajax.php?action=browse&' + search_params + "&page={}".format(page))
+    r = s.get('https://what.cd/ajax.php?action=browse&' + search_params + "&page={}".format(page), headers=headers)
     data = json.loads(r.content)
     for group in data['response']['results']:
       if 'torrents' in group:
