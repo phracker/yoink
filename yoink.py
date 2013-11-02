@@ -42,7 +42,7 @@ def download_torrent(session, tid, name):
   with open(path, 'wb') as f:
     for chunk in dl.iter_content(1024*1024):
       f.write(chunk)
-  time.sleep(1)
+  time.sleep(2)
   print 'Yoink!'
 
 def main():
