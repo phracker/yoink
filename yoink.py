@@ -19,7 +19,7 @@ target = ''
 defaultrc=["user:",'\n',"password:",'\n',"target:"]
 
 headers = {
-  'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9) AppleWebKit/537.71 (KHTML, like Gecko) Version/7.0 Safari/537.71'
+  'User-Agent': 'Yoink! Beta'
 }
 
 def download_torrent(session, tid, name):
