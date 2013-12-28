@@ -112,6 +112,7 @@ def main():
     if page > data['response']['pages']:
       print "Wow, done already?"
       break
+    time.sleep(2)
 
   print "Phew! Now that was one intense Yoink!"
 
