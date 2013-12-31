@@ -23,6 +23,7 @@ max_storage = ''
 max_age = ''
 storage_dir = ''
 track_by_index_number = None
+add_all_torrents_to_db = False
 
 defaultrc=["user:",'\n',"password:",'\n',"target:"'\n',"max_age:"'\n',"max_storage_in_mb:"'\n',"storage_dir:"'\n',"track_by_index_number:TRUE"]
 
@@ -63,23 +64,29 @@ def torrentAlreadyDownloaded(tid):
 
 def addTorrentToDB(tid):
   if track_by_index_number:
-    try:
-      indexdb = sqlite3.connect(os.path.expanduser(dbpath))
-      indexdbc = indexdb.cursor()
-      indexdbc.execute("INSERT INTO snatchedtorrents values (?)", [tid])
-      indexdb.commit()
-    except Exception,e:
-      print 'Error when executing INSERT on ~/.yoink.db:'
-      print str(e)
-      sys.exit()
-    finally:
-      if indexdb:
-        indexdbc.close()
+    if torrentAlreadyDownloaded(tid) == False:
+      try:
+        indexdb = sqlite3.connect(os.path.expanduser(dbpath))
+        indexdbc = indexdb.cursor()
+        indexdbc.execute("INSERT INTO snatchedtorrents values (?)", [tid])
+        indexdb.commit()
+      except Exception,e:
+        print 'Error when executing INSERT on ~/.yoink.db:'
+        print str(e)
+        sys.exit()
+      finally:
+        if indexdb:
+          indexdbc.close()
 
 def download_torrent(session, tid, name):
   if not os.path.exists(target):
     print 'Target Directory does not exist, creating...'
     os.mkdir(target)
+
+  if add_all_torrents_to_db == True:
+    addTorrentToDB(tid)
+    print 'Added {} to database.'.format(tid)
+    return
 
   if torrentAlreadyDownloaded(tid):
     print 'I have previously downloaded {}.'.format(tid)
@@ -117,10 +124,13 @@ def main():
     print 'user:USERNAME'
     print 'password:PASSWORD'
     print 'target:TORRENTDIR'
-    print 'max_age:NUMDAYS [Optional, default: 3650]'
+    print 'max_age:NUMDAYS [Optional, default: does not check]'
     print 'max_storage_in_mb:NUMINMEGABYTES [Optional, if left blank will not check]'
     print 'storage_dir:STORAGEDIR [Optional, default home directory]'
     print 'track_by_index_number:TRUE or FALSE'
+    print '---------------'
+    print 'If you want to add all existing torrents to the tracking database, use command line argument --add-all-torrents-to-db.'
+    print 'This mechanism is intended for users who want to ignore all existing freeleech torrents as at the time that argument is passed through to the script.'
     return 0
   else:
     rcf = open(rcpath)
@@ -147,7 +157,7 @@ def main():
       print 'Max Age (max_age) parameter must be a whole positive number.'
       return 0
     elif max_age == '':
-      max_age = 3650
+      max_age = False
     else:
       max_age = int(max_age)
 
@@ -184,6 +194,13 @@ def main():
       print 'Track by index number (track_by_index_number) parameter must be TRUE or FALSE.'
       return 0
 
+    if len(sys.argv) >= 2:
+      if str(sys.argv[1]).lower() == '--add-all-torrents-to-db':
+        global add_all_torrents_to_db
+        add_all_torrents_to_db = True
+        if track_by_index_number == False:
+          print 'Warning: Adding all torrents to database with tracking by index number disabled will make this operation useless until you re-enable index number tracking.'
+
   search_params = 'search=&freetorrent=1'
 
   html_parser = HTMLParser.HTMLParser()
@@ -207,8 +224,10 @@ def main():
   with open(cookiefile, 'w') as f:
     pickle.dump(s.cookies, f)
 
-  cur_time = int(time.time())
-  oldest_time = cur_time - (int(max_age) * (24 * 60 * 60))
+  
+  if max_age != False:
+    cur_time = int(time.time())
+    oldest_time = cur_time - (int(max_age) * (24 * 60 * 60))
 
   continueLeeching = True
   page = 1
@@ -216,10 +235,11 @@ def main():
     r = s.get('https://what.cd/ajax.php?action=browse&' + search_params + "&page={}".format(page), headers=headers)
     data = json.loads(r.content)
     for group in data['response']['results']:
-      if int(group['groupTime']) < oldest_time:
-        continueLeeching = False
-        break
-      if isStorageFull(max_storage):
+      if max_age != False:
+        if int(group['groupTime']) < oldest_time and add_all_torrents_to_db == False:
+          continueLeeching = False
+          break
+      if isStorageFull(max_storage) and add_all_torrents_to_db == False:
         continueLeeching = False
         print 'Your storage equals or exceeds ' + str(max_storage) + 'MB, exiting...'
         break
