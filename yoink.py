@@ -31,8 +31,47 @@ headers = {
   'User-Agent': 'Yoink! Beta'
 }
 
+def printHelpMessage(header = ''):
+  if len(header) > 0:
+    print header
+  print 'Yoink! A Freeleech Torrent Grabber for What.CD'
+  print 'Developed by tobbez, forked by evanjd.'
+  print 'usage: python yoink.py [option]'
+  print 'Options:'
+  print '--add-all-torrents-to-db : adds all existing freeleech torrents to the yoink'
+  print '                           database without downloading the .torrent file.'
+  print '                           Use this option if you want to ignore all'
+  print '                           existing freeleech torrents and only yoink new ones.'
+  print '--recreate-yoinkrc       : deletes existing ~/.yoinkrc and generates new file'
+  print '                           with default settings. Use this if migrating from'
+  print '                           another version of yoink.py'
+  print '--help, -h -?            : this help message'
+  print '\n'
+  print 'Yoink settings are stored in ~/.yoinkrc. Accepted paramaters are:'
+  print '   user:                  [your what.cd username]'
+  print '   password:              [your what.cd password]'
+  print '   target:                [your torrent client watch dir]'
+  print '   max_age:               [the maximum age of a torrent in days that'
+  print '                          yoink will download].'
+  print '                          If left blank, will not check age of torrent.'
+  print '   max_storage_in_mb:     [the maximum size in megabytes of your storage dir]'
+  print '                          If the size of your storage folder exceeds the'
+  print '                          specified size, yoink will stop downloading'
+  print '                          new torrents.'
+  print '                          Intended for seedboxes with limited storage quotas.'
+  print '                          If left blank, will not check size of storage dir.'
+  print '   storage_dir:           [your torrent data dir]'
+  print '                          If left blank, defaults to home directory.'
+  print '   track_by_index_number: [TRUE or FALSE]'
+  print '                          if true, will write all downloaded torrent IDs to'
+  print '                          ~/.yoink.db and use this as the primary mechanism'
+  print '                          for checking if a given torrent has already'
+  print '                          been yoinked.'
+  print '\n'
+  print 'NOTE: Parameters must be in the provided order!'
+
 def isStorageFull(max_storage):
-  if max_storage == False:
+  if not max_storage:
     return False
 
   totalSize = sum( os.path.getsize(os.path.join(dirpath,filename)) for dirpath, dirnames, filenames in os.walk( storage_dir ) for filename in filenames ) /1024/1024
@@ -64,7 +103,7 @@ def torrentAlreadyDownloaded(tid):
 
 def addTorrentToDB(tid):
   if track_by_index_number:
-    if torrentAlreadyDownloaded(tid) == False:
+    if not torrentAlreadyDownloaded(tid):
       try:
         indexdb = sqlite3.connect(os.path.expanduser(dbpath))
         indexdbc = indexdb.cursor()
@@ -77,6 +116,12 @@ def addTorrentToDB(tid):
       finally:
         if indexdb:
           indexdbc.close()
+
+def checkForArg(arg):
+  for clarg in sys.argv[1:]:
+    if arg.lower() == clarg.lower():
+      return True
+  return False
 
 def download_torrent(session, tid, name):
   if not os.path.exists(target):
@@ -112,25 +157,22 @@ def download_torrent(session, tid, name):
   print 'Yoink!'
 
 def main():
-
   rcpath=os.path.expanduser('~/.yoinkrc')
+
+  if checkForArg('--help') or checkForArg('-h') or checkForArg('-?'):
+    printHelpMessage()
+    return 0
+
+  if checkForArg('--recreate-yoinkrc'):
+    if os.path.exists(rcpath):
+      os.remove(rcpath)
+
   if not os.path.exists(rcpath):
     rcf = open(rcpath,'w')
     rcf.writelines(defaultrc)
     rcf.flush()
     rcf.close()
-    print 'Wrote initial-run configuration files to ~/.yoinkrc'
-    print 'Modify it appropriately and reload Yoink!'
-    print 'user:USERNAME'
-    print 'password:PASSWORD'
-    print 'target:TORRENTDIR'
-    print 'max_age:NUMDAYS [Optional, default: does not check]'
-    print 'max_storage_in_mb:NUMINMEGABYTES [Optional, if left blank will not check]'
-    print 'storage_dir:STORAGEDIR [Optional, default home directory]'
-    print 'track_by_index_number:TRUE or FALSE'
-    print '---------------'
-    print 'If you want to add all existing torrents to the tracking database, use command line argument --add-all-torrents-to-db.'
-    print 'This mechanism is intended for users who want to ignore all existing freeleech torrents as at the time that argument is passed through to the script.'
+    printHelpMessage('Wrote initial-run configuration file to ~/.yoinkrc\nYou will need to modify this file before continuing!\nSee below for accepted parameters:\n')
     return 0
   else:
     rcf = open(rcpath)
@@ -150,19 +192,19 @@ def main():
     track_by_index_number = rcf.readline().rstrip('\n')[22:]
     
     if user=='' or password=='' or target=='' or track_by_index_number=='':
-      print 'Finish filling out ~/.yoinkrc and try again!'
+      printHelpMessage('ERROR: The ~/.yoinkrc configuration file appears incomplete!\nYou may need to use option --recreate-yoinkrc to revert your ~/.yoinkrc to the initial-run state for this version of Yoink.\n')
       return 0
 
-    if max_age != '' and max_age.isdigit() == False:
-      print 'Max Age (max_age) parameter must be a whole positive number.'
+    if max_age != '' and not max_age.isdigit():
+      printHelpMessage('ERROR: Max Age (max_age) parameter must be a whole positive number.\n')
       return 0
     elif max_age == '':
       max_age = False
     else:
       max_age = int(max_age)
 
-    if max_storage != '' and max_storage.isdigit() == False:
-      print 'Max Storage (max_storage) parameter must be a whole positive number.'
+    if max_storage != '' and not max_storage.isdigit():
+      printHelpMessage('ERROR: Max Storage (max_storage) parameter must be a whole positive number.\n')
       return 0
     elif max_storage == '':
       max_storage = False
@@ -172,17 +214,17 @@ def main():
     if storage_dir != '':
       try:
         storage_dir = os.path.expanduser(storage_dir)
-        if os.path.exists(storage_dir) == False:
+        if not os.path.exists(storage_dir):
           raise NameError('InvalidPath')
       except:
-        print 'Storage directory (storage_dir) paramater does not resolve to a known directory.'
+        printHelpMessage('ERROR: Storage directory (storage_dir) paramater does not resolve to a known directory.\n')
         return 0
     else:
       storage_dir = os.path.expanduser('~')
 
     if track_by_index_number.upper() == 'TRUE':
       track_by_index_number = True
-      if os.path.exists(os.path.expanduser(dbpath)) == False:
+      if not os.path.exists(os.path.expanduser(dbpath)):
         open(os.path.expanduser(dbpath), 'w+').close()
       indexdb = sqlite3.connect(os.path.expanduser(dbpath))
       indexdbc = indexdb.cursor()
@@ -191,15 +233,14 @@ def main():
     elif track_by_index_number.upper() == 'FALSE':
       track_by_index_number = False
     else:
-      print 'Track by index number (track_by_index_number) parameter must be TRUE or FALSE.'
+      printHelpMessage('ERROR: Track by index number (track_by_index_number) parameter must be TRUE or FALSE.\n')
       return 0
 
-    if len(sys.argv) >= 2:
-      if str(sys.argv[1]).lower() == '--add-all-torrents-to-db':
-        global add_all_torrents_to_db
-        add_all_torrents_to_db = True
-        if track_by_index_number == False:
-          print 'Warning: Adding all torrents to database with tracking by index number disabled will make this operation useless until you re-enable index number tracking.'
+    if checkForArg('--add-all-torrents-to-db'):
+      global add_all_torrents_to_db
+      add_all_torrents_to_db = True
+      if not track_by_index_number:
+        print 'WARNING: Adding all torrents to database with tracking by index number disabled will make this operation useless until you re-enable index number tracking.'
 
   search_params = 'search=&freetorrent=1'
 
@@ -218,7 +259,7 @@ def main():
   if r.url != u'https://what.cd/index.php':
     r = s.post('https://what.cd/login.php', data={'username': user, 'password': password})
     if r.url != u'https://what.cd/index.php':
-      print "Login failed - come on, you're looking right at your password!"
+      printHelpMessage("Login failed - come on, you're looking right at your password!\n")
       return
 
   with open(cookiefile, 'w') as f:
@@ -236,10 +277,10 @@ def main():
     data = json.loads(r.content)
     for group in data['response']['results']:
       if max_age != False:
-        if int(group['groupTime']) < oldest_time and add_all_torrents_to_db == False:
+        if int(group['groupTime']) < oldest_time and not add_all_torrents_to_db:
           continueLeeching = False
           break
-      if isStorageFull(max_storage) and add_all_torrents_to_db == False:
+      if isStorageFull(max_storage) and not add_all_torrents_to_db:
         continueLeeching = False
         print 'Your storage equals or exceeds ' + str(max_storage) + 'MB, exiting...'
         break

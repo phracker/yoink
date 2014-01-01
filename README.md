@@ -3,31 +3,33 @@
 *A Freeleech Torrent Grabber for What.CD*
 ---
 
->Requires python2.7 + pip + `$ pip install json requests HTMLParser`
->
->Usage: `$ python yoink.py`
->
->This is a forked version of tobbez's what.cd grabber, with some additions:
->* Added some new features, represented by the below parameters:
->	* max_age: The maximum age in days that freeleech torrents should be downloaded. This was cherrypicked from [bitfoo's commit](https://github.com/bitfoo/yoink/commit/2b980191c80f8c17b83235fcd431ed7af53af4e8). If left blank, the age of the torrent will be ignored.
->	* max_storage_in_mb: Applicable to seedboxes with limited storage, the maximum capacity (in MB) of your storage area. If left blank, the size of your storage area will not be evaluated.
->	* storage_dir: The folder that will be evaluated when checking if the maximum capacity of your storage area has been exceeded. Defaults to your home directory.
->	* track_by_index_number: If TRUE, will track and check torrent IDs in a sqlite db (~/.yoink.db) in addition to checking for the torrent file in your watch directory.
->* Changed the sleep between yoinks to occur after each API request, rather than each torrent download.
->* If you want to ignore all existing freelech torrents, pass the following argument into yoink like so `$ python yoink.py --add-all-torrents-to-db`. This will add every torrent ID yoink finds into ~/.yoink.db without downloading the .torrent file and will ignore these torrents in subsequent yoinks provided track_by_index_number is set to TRUE in ~/.yoinkrc.
->
->On the initial run, a file called `~/.yoinkrc` will be generated.
->
->Edit this file to include the proper information, then re-run `$ python yoink.py`
->
->To create a cron job that executes this script every hour, simply:
->
->`$ crontab -e`
->
->and add:
->
->`00 * * * * python /path/to/yoink.py`
+Requires python2.7 + pip + `$ pip install json requests HTMLParser`
 
+Usage: `python yoink.py [option]`
+
+Options:
+
+- `--add-all-torrents-to-db`: adds all existing freeleech torrents to the yoink database without downloading the .torrent file. Use this option if you want to ignore all existing freeleech torrents and only yoink new ones.
+- `--recreate-yoinkrc`: deletes existing ~/.yoinkrc and generates new file with default settings. Use this if migrating from another version of yoink.py
+- `--help` or `-h` or `-?`: shows help message
+
+Yoink settings are stored in ~/.yoinkrc and this file will be auto-generated on initial run. Accepted parameters are:
+
+- `user`: your what.cd username
+- `pass`: your what.cd password
+- `target`: your torrent client watch directory
+- `max_age`: the maximum age of a torrent in days that yoink will download. If left blank, yoink will not check the age of the torrent.
+- `max_storage_in_mb`: the maximum size in megabytes of your storage directory. If the size of your storage directory exceeds the specified size, yoink will stop downloading new torrents. This runs on the assumption that your torrent client preallocated the space required for each torrent immediately after the .torrent folder is added to your watch directory. If left blank, yoink will not check the size of your storage area. This is intended for seedboxes with limited storage quotas.
+- `storage_dir`: Your torrent data directory. If left blank, defaults to your home directory.
+- `track_by_index_number`: TRUE or FALSE. If true, will write all downloaded torrent IDs to ~/.yoink.db and use this as the primary mechanism for checking if a given torrent has already been yoinked.
+
+To create a cron job that executes this script every hour, simply:
+
+`$ crontab -e`
+
+and add:
+
+`00 * * * * python /path/to/yoink.py`
 
 **Now work out that buffer! (without blowing your storage quota)**
 
