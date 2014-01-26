@@ -296,12 +296,13 @@ def main():
       time.sleep(2)
     page += 1
     if page > data['response']['pages']:
-      print "Wow, done already?"
       break
     time.sleep(2)
 
-  print "Phew! Now that was one intense Yoink!"
-
+  print "Phew! All done."
+  print ""
+  print "Yoink!: The Freeleech Torrent Grabber for What.CD"
+  print "            \"Go Yoink! Yourself!\""
 
 if __name__ == '__main__':
   main()
