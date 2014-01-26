@@ -257,7 +257,7 @@ def main():
 
   r = s.get('https://what.cd/login.php')
   if r.url != u'https://what.cd/index.php':
-    r = s.post('https://what.cd/login.php', data={'username': user, 'password': password})
+    r = s.post('https://what.cd/login.php', data={'username': user, 'password': password}, headers=headers)
     if r.url != u'https://what.cd/index.php':
       printHelpMessage("Login failed - come on, you're looking right at your password!\n")
       return
