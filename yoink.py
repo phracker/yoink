@@ -302,7 +302,7 @@ def main():
   print "Phew! All done."
   print ""
   print "Yoink!: The Freeleech Torrent Grabber for What.CD"
-  print "            \"Go Yoink! Yourself!\""
+  print "\"Go Yoink! Yourself!\""
 
 if __name__ == '__main__':
   main()
