@@ -35,7 +35,7 @@ def printHelpMessage(header = ''):
   if len(header) > 0:
     print header
   print 'Yoink! A Freeleech Torrent Grabber for What.CD'
-  print 'Developed by tobbez, forked by evanjd.'
+  print 'Developed by tobbez, forked by phracker and evanjd.'
   print 'usage: python yoink.py [option]'
   print 'Options:'
   print '--add-all-torrents-to-db : adds all existing freeleech torrents to the yoink'
@@ -300,7 +300,7 @@ def main():
     time.sleep(2)
 
   print "Phew! All done."
-  print ""
+  print '\n'
   print "Yoink!: The Freeleech Torrent Grabber for What.CD"
   print "\"Go Yoink! Yourself!\""
 
