@@ -33,6 +33,10 @@ and add:
 
 **Now work out that buffer! (without blowing your storage quota)**
 
+### Contributors
+
 *<3 [tobbez](https://what.cd/user.php?id=605)*
+
+*<3 [phracker](https://what.cd/user.php?id=260077)*
 
 *<3 [evanjd/notarebel](https://what.cd/user.php?id=417)*
