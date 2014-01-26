@@ -33,4 +33,4 @@ and add:
 
 *Now work out that buffer! (without blowing your storage quota)*
 
-**Contributors:  ![<3](http://i.imgur.com/kX2q6Bm.png)[tobbez](https://what.cd/user.php?id=605)  ![<3](http://i.imgur.com/kX2q6Bm.png)[phracker](https://what.cd/user.php?id=260077)  ![<3](http://i.imgur.com/kX2q6Bm.png)[evanjd/notarebel](https://what.cd/user.php?id=417)**
+**Contributors:  [tobbez![<3](http://i.imgur.com/kX2q6Bm.png)](https://what.cd/user.php?id=605)  [phracker![<3](http://i.imgur.com/kX2q6Bm.png)](https://what.cd/user.php?id=260077)  [evanjd/notarebel![<3](http://i.imgur.com/kX2q6Bm.png)](https://what.cd/user.php?id=417)**
