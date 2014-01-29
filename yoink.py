@@ -255,9 +255,22 @@ def main():
     with open(cookiefile, 'r') as f:
       s.cookies = pickle.load(f)
 
-  r = s.get('https://what.cd/login.php')
+  connected = False
+  connectionAttempts = 0
+
+  while connected == False and connectionAttempts < 10:
+    try:
+      connectionAttempts += 1
+      r = s.get('https://what.cd/login.php')
+      connected = True
+    except requests.exceptions.TooManyRedirects:
+      s.cookies.clear()
+    except requests.exceptions.RequestException as e:
+      print e
+      sys.exit(1)  
+
   if r.url != u'https://what.cd/index.php':
-    r = s.post('https://what.cd/login.php', data={'username': user, 'password': password}, headers=headers)
+    r = s.post('https://what.cd/login.php', data={'username': user, 'password': password, 'keeplogged': 1}, headers=headers)
     if r.url != u'https://what.cd/index.php':
       printHelpMessage("Login failed - come on, you're looking right at your password!\n")
       return
