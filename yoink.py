@@ -25,7 +25,7 @@ storage_dir = ''
 track_by_index_number = None
 add_all_torrents_to_db = False
 
-defaultrc=["user:",'\n',"password:",'\n',"target:"'\n',"max_age:"'\n',"max_storage_in_mb:"'\n',"storage_dir:"'\n',"track_by_index_number:TRUE"]
+defaultrc=["user:",'\n',"password:",'\n',"target:"'\n',"max_age:"'\n',"max_storage_in_mb:"'\n',"storage_dir:"'\n',"track_by_index_number:TRUE",'\n',"encoding:",'\n',"format:",'\n',"media:",'\n',"releasetype:"]
 
 headers = {
   'User-Agent': 'Yoink! Beta'
@@ -67,6 +67,8 @@ def printHelpMessage(header = ''):
   print '                          ~/.yoink.db and use this as the primary mechanism'
   print '                          for checking if a given torrent has already'
   print '                          been yoinked.'
+  print '\n'
+  print 'Please see the readme for filter options: http://git.io/kKuYrw'
   print '\n'
   print 'NOTE: Parameters must be in the provided order!'
 
@@ -190,7 +192,15 @@ def main():
     storage_dir = rcf.readline().rstrip('\n')[12:]
     global track_by_index_number
     track_by_index_number = rcf.readline().rstrip('\n')[22:]
-    
+    global encoding
+    encoding = rcf.readline().rstrip('\n')[9:]
+    global format
+    format = rcf.readline().rstrip('\n')[7:]
+    global media
+    media = rcf.readline().rstrip('\n')[6:]
+    global releasetype
+    releasetype = rcf.readline().rstrip('\n')[12:]
+
     if user=='' or password=='' or target=='' or track_by_index_number=='':
       printHelpMessage('ERROR: The ~/.yoinkrc configuration file appears incomplete!\nYou may need to use option --recreate-yoinkrc to revert your ~/.yoinkrc to the initial-run state for this version of Yoink.\n')
       return 0
@@ -242,7 +252,7 @@ def main():
       if not track_by_index_number:
         print 'WARNING: Adding all torrents to database with tracking by index number disabled will make this operation useless until you re-enable index number tracking.'
 
-  search_params = 'search=&freetorrent=1'
+  search_params = 'search=&freetorrent=1' + '&encoding=' + encoding + '&format=' + format + '&media=' + media + '&releasetype=' + releasetype
 
   html_parser = HTMLParser.HTMLParser()
   fcre = re.compile('''[/\\?*:|"<>]''')
@@ -278,7 +288,6 @@ def main():
   with open(cookiefile, 'w') as f:
     pickle.dump(s.cookies, f)
 
-  
   if max_age != False:
     cur_time = int(time.time())
     oldest_time = cur_time - (int(max_age) * (24 * 60 * 60))
@@ -308,10 +317,17 @@ def main():
         download_torrent(s, group['torrentId'], fn)
       time.sleep(2)
     page += 1
-    if page > data['response']['pages']:
-      break
-    time.sleep(2)
+    if data['response']['results'] == []:
+      print '\n'
+      print 'Your search returned 0 results. Please check your filters for conflicts such as FLAC + 320.'
+      print '\n'
+      return
+    else:
+      if page > data['response']['pages']:
+        break
+      time.sleep(2)
 
+  print '\n'
   print "Phew! All done."
   print '\n'
   print "Yoink!: The Freeleech Torrent Grabber for What.CD"
