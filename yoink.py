@@ -68,7 +68,7 @@ def printHelpMessage(header = ''):
   print '                          for checking if a given torrent has already'
   print '                          been yoinked.'
   print '\n'
-  print 'Please see the readme for filter options: http://git.io/kKuYrw'
+  print 'Please see the wiki for filter options: http://git.io/5ZFi9A'
   print '\n'
   print 'NOTE: Parameters must be in the provided order!'
 
