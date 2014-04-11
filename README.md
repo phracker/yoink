@@ -25,7 +25,7 @@ Yoink settings are stored in ~/.yoinkrc and this file will be auto-generated on 
 - `storage_dir`: Your torrent data directory. If left blank, defaults to your home directory.
 - `track_by_index_number`: TRUE or FALSE. If true, will write all downloaded torrent IDs to ~/.yoink.db and use this as the primary mechanism for checking if a given torrent has already been yoinked.
 
-Filter configuration in the [wiki](http://git.io/5ZFi9A).
+[Filter Configuration Information](http://git.io/5ZFi9A)
 
 To create a cron job that executes this script every hour, simply:
 
