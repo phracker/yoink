@@ -25,6 +25,8 @@ Yoink settings are stored in ~/.yoinkrc and this file will be auto-generated on 
 - `storage_dir`: Your torrent data directory. If left blank, defaults to your home directory.
 - `track_by_index_number`: TRUE or FALSE. If true, will write all downloaded torrent IDs to ~/.yoink.db and use this as the primary mechanism for checking if a given torrent has already been yoinked.
 
+Filter configuration in the [wiki](http://git.io/5ZFi9A).
+
 To create a cron job that executes this script every hour, simply:
 
 `$ crontab -e`
@@ -34,68 +36,5 @@ and add:
 `00 * * * * python /path/to/yoink.py`
 
 *Now work out that buffer! (without blowing your storage quota)*
-
-Extra Filters
---- 
-
-### encoding
-
-Using one of these options:
-
-    192
-    APS+(VBR)
-    V2+(VBR)
-    V1+(VBR)
-    256
-    APX+(VBR)
-    V0+(VBR)
-    320
-    Lossless
-    24bit+Lossless
-    V8+(VBR)
-
-### format
-
-Using one of these options:
-
-    MP3
-    FLAC
-    AAC
-    AC3
-    DTS
-
-### media
-
-Using one of these options:
-
-    CD
-    DVD
-    Vinyl
-    Soundboard
-    SACD
-    DAT
-    Cassette
-    WEB
-    Blu-ray
-
-### releasetype
-
-Using one of these numerical options ranging from 1 to 23:
-
-    1 = Album
-    3 = Soundtrack
-    5 = EP
-    6 = Anthology
-    7 = Compilation
-    8 = DJ Mix
-    9 = Single
-    11 = Live Album
-    13 = Remix
-    14 = Bootleg
-    15 = Interview
-    16 = MixTape
-    21 = Unknown
-    22 = Concert Recording
-    23 = Demo 
 
 **Contributors:  [tobbez![<3](http://i.imgur.com/kX2q6Bm.png)](https://what.cd/user.php?id=605)  [evanjd/notarebel![<3](http://i.imgur.com/kX2q6Bm.png)](https://what.cd/user.php?id=417)  [phracker![<3](http://i.imgur.com/kX2q6Bm.png)](https://what.cd/user.php?id=260077)  [feralhosting![<3](http://i.imgur.com/kX2q6Bm.png)](https://www.feralhosting.com)**
