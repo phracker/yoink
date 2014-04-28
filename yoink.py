@@ -13,7 +13,7 @@ import sqlite3
 from os.path import expanduser
 
 ## SAFE TO EDIT ##
-dbpath = '~/.yoink.db'
+dbpath = '~/.yoinkstp.db'
 
 ## DO NOT TOUCH THESE ##
 user = ''
@@ -25,7 +25,7 @@ storage_dir = ''
 track_by_index_number = None
 add_all_torrents_to_db = False
 
-defaultrc=["user:",'\n',"password:",'\n',"target:"'\n',"max_age:"'\n',"max_storage_in_mb:"'\n',"storage_dir:"'\n',"track_by_index_number:TRUE",'\n',"encoding:",'\n',"format:",'\n',"media:",'\n',"releasetype:"]
+defaultrc=["user:",'\n',"password:",'\n',"target:"'\n',"max_age:"'\n',"max_storage_in_mb:"'\n',"storage_dir:"'\n',"track_by_index_number:TRUE"]
 
 headers = {
   'User-Agent': 'Yoink! Beta'
@@ -42,12 +42,12 @@ def printHelpMessage(header = ''):
   print '                           database without downloading the .torrent file.'
   print '                           Use this option if you want to ignore all'
   print '                           existing freeleech torrents and only yoink new ones.'
-  print '--recreate-yoinkrc       : deletes existing ~/.yoinkrc and generates new file'
+  print '--recreate-yoinkrc       : deletes existing ~/.yoinkstprc and generates new file'
   print '                           with default settings. Use this if migrating from'
   print '                           another version of yoink.py'
   print '--help, -h -?            : this help message'
   print '\n'
-  print 'Yoink settings are stored in ~/.yoinkrc. Accepted paramaters are:'
+  print 'Yoink settings are stored in ~/.yoinkstprc. Accepted paramaters are:'
   print '   user:                  [your what.cd username]'
   print '   password:              [your what.cd password]'
   print '   target:                [your torrent client watch dir]'
@@ -64,7 +64,7 @@ def printHelpMessage(header = ''):
   print '                          If left blank, defaults to home directory.'
   print '   track_by_index_number: [TRUE or FALSE]'
   print '                          if true, will write all downloaded torrent IDs to'
-  print '                          ~/.yoink.db and use this as the primary mechanism'
+  print '                          ~/.yoinkstp.db and use this as the primary mechanism'
   print '                          for checking if a given torrent has already'
   print '                          been yoinked.'
   print '\n'
@@ -93,7 +93,7 @@ def torrentAlreadyDownloaded(tid):
       else:
         torrent_found = True
     except Exception,e:
-      print 'Error when executing SELECT on ~/.yoink.db:'
+      print 'Error when executing SELECT on ~/.yoinkstp.db:'
       print str(e)
       sys.exit()
     finally:
@@ -112,7 +112,7 @@ def addTorrentToDB(tid):
         indexdbc.execute("INSERT INTO snatchedtorrents values (?)", [tid])
         indexdb.commit()
       except Exception,e:
-        print 'Error when executing INSERT on ~/.yoink.db:'
+        print 'Error when executing INSERT on ~/.yoinkstp.db:'
         print str(e)
         sys.exit()
       finally:
@@ -146,12 +146,12 @@ def download_torrent(session, tid, name):
     return
 
   if not hasattr(download_torrent, 'authdata'):
-    r = session.get('https://what.cd/ajax.php?action=index', headers=headers)
+    r = session.get('https://stopthepress.es/ajax.php?action=index', headers=headers)
     d = json.loads(r.content)
     download_torrent.authdata = '&authkey={}&torrent_pass={}'.format(d['response']['authkey'], d['response']['passkey'])
 
   print '{}:'.format(tid),
-  dl = session.get('https://what.cd/torrents.php?action=download&id={}{}'.format(tid, download_torrent.authdata), headers=headers)
+  dl = session.get('https://stopthepress.es/torrents.php?action=download&id={}{}'.format(tid, download_torrent.authdata), headers=headers)
   with open(path, 'wb') as f:
     for chunk in dl.iter_content(1024*1024):
       f.write(chunk)
@@ -159,7 +159,7 @@ def download_torrent(session, tid, name):
   print 'Yoink!'
 
 def main():
-  rcpath=os.path.expanduser('~/.yoinkrc')
+  rcpath=os.path.expanduser('~/.yoinkstprc')
 
   if checkForArg('--help') or checkForArg('-h') or checkForArg('-?'):
     printHelpMessage()
@@ -174,7 +174,7 @@ def main():
     rcf.writelines(defaultrc)
     rcf.flush()
     rcf.close()
-    printHelpMessage('Wrote initial-run configuration file to ~/.yoinkrc\nYou will need to modify this file before continuing!\nSee below for accepted parameters:\n')
+    printHelpMessage('Wrote initial-run configuration file to ~/.yoinkstprc\nYou will need to modify this file before continuing!\nSee below for accepted parameters:\n')
     return 0
   else:
     rcf = open(rcpath)
@@ -192,17 +192,17 @@ def main():
     storage_dir = rcf.readline().rstrip('\n')[12:]
     global track_by_index_number
     track_by_index_number = rcf.readline().rstrip('\n')[22:]
-    global encoding
-    encoding = rcf.readline().rstrip('\n')[9:]
-    global format
-    format = rcf.readline().rstrip('\n')[7:]
-    global media
-    media = rcf.readline().rstrip('\n')[6:]
-    global releasetype
-    releasetype = rcf.readline().rstrip('\n')[12:]
+    # global encoding
+    # encoding = rcf.readline().rstrip('\n')[9:]
+    # global format
+    # format = rcf.readline().rstrip('\n')[7:]
+    # global media
+    # media = rcf.readline().rstrip('\n')[6:]
+    # global releasetype
+    # releasetype = rcf.readline().rstrip('\n')[12:]
 
     if user=='' or password=='' or target=='' or track_by_index_number=='':
-      printHelpMessage('ERROR: The ~/.yoinkrc configuration file appears incomplete!\nYou may need to use option --recreate-yoinkrc to revert your ~/.yoinkrc to the initial-run state for this version of Yoink.\n')
+      printHelpMessage('ERROR: The ~/.yoinkstprc configuration file appears incomplete!\nYou may need to use option --recreate-yoinkrc to revert your ~/.yoinkstprc to the initial-run state for this version of Yoink.\n')
       return 0
 
     if max_age != '' and not max_age.isdigit():
@@ -252,7 +252,7 @@ def main():
       if not track_by_index_number:
         print 'WARNING: Adding all torrents to database with tracking by index number disabled will make this operation useless until you re-enable index number tracking.'
 
-  search_params = 'search=&freetorrent=1' + '&encoding=' + encoding + '&format=' + format + '&media=' + media + '&releasetype=' + releasetype
+  search_params = 'search=&freetorrent=1'
 
   html_parser = HTMLParser.HTMLParser()
   fcre = re.compile('''[/\\?*:|"<>]''')
@@ -260,7 +260,7 @@ def main():
 
   s = requests.session()
 
-  cookiefile = os.path.expanduser('~/.yoink.dat')
+  cookiefile = os.path.expanduser('~/.yoinkstp.dat')
   if os.path.exists(cookiefile):
     with open(cookiefile, 'r') as f:
       s.cookies = pickle.load(f)
@@ -271,17 +271,17 @@ def main():
   while connected == False and connectionAttempts < 10:
     try:
       connectionAttempts += 1
-      r = s.get('https://what.cd/login.php')
+      r = s.get('https://stopthepress.es/login.php')
       connected = True
     except requests.exceptions.TooManyRedirects:
       s.cookies.clear()
     except requests.exceptions.RequestException as e:
       print e
-      sys.exit(1)  
+      sys.exit(1)
 
-  if r.url != u'https://what.cd/index.php':
-    r = s.post('https://what.cd/login.php', data={'username': user, 'password': password, 'keeplogged': 1}, headers=headers)
-    if r.url != u'https://what.cd/index.php':
+  if r.url != u'https://stopthepress.es/index.php':
+    r = s.post('https://stopthepress.es/login.php', data={'username': user, 'password': password, 'keeplogged': 1}, headers=headers)
+    if r.url != u'https://stopthepress.es/index.php':
       printHelpMessage("Login failed - come on, you're looking right at your password!\n")
       return
 
@@ -295,7 +295,7 @@ def main():
   continueLeeching = True
   page = 1
   while continueLeeching:
-    r = s.get('https://what.cd/ajax.php?action=browse&' + search_params + "&page={}".format(page), headers=headers)
+    r = s.get('https://stopthepress.es/ajax.php?action=browse&' + search_params + "&page={}".format(page), headers=headers)
     data = json.loads(r.content)
     for group in data['response']['results']:
       if max_age != False:
@@ -330,7 +330,7 @@ def main():
   print '\n'
   print "Phew! All done."
   print '\n'
-  print "Yoink!: The Freeleech Torrent Grabber for What.CD"
+  print "Yoink!: The Freeleech Torrent Grabber for StopThePress.es"
   print "\"Go Yoink! Yourself!\""
 
 if __name__ == '__main__':
