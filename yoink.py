@@ -76,7 +76,7 @@ def isStorageFull(max_storage):
   if not max_storage:
     return False
 
-  totalSize = sum( os.path.getsize(os.path.join(dirpath,filename)) for dirpath, dirnames, filenames in os.walk( storage_dir ) for filename in filenames ) /1024/1024
+  totalSize = sum( os.path.getsize(u''.join(os.path.join(dirpath,filename)).encode('utf-8').strip()) for dirpath, dirnames, filenames in os.walk( storage_dir ) for filename in filenames ) /1024/1024
   if totalSize >= max_storage:
     return True
   else:
@@ -139,7 +139,7 @@ def download_torrent(session, tid, name):
     print 'I have previously downloaded {}.'.format(tid)
     return
 
-  path = os.path.join(target, name)
+  path = u''.join(os.path.join(target, name)).encode('utf-8').strip()
   if os.path.exists(path):
     print 'I already haz {}.'.format(tid)
     addTorrentToDB(tid)
