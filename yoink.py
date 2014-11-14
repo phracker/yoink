@@ -297,6 +297,9 @@ def main():
   while continueLeeching:
     r = s.get('https://what.cd/ajax.php?action=browse&' + search_params + "&page={}".format(page), headers=headers)
     data = json.loads(r.content)
+    if data['response'] == []:
+        print data['status']
+        return
     for group in data['response']['results']:
       if max_age != False:
         if int(group['groupTime']) < oldest_time and not add_all_torrents_to_db:
