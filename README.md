@@ -1,6 +1,13 @@
+<!--
 <p align="center">
 <img src="https://i.imgur.com/C8OW3yw.png" alt="Yoink">
 </p>
+-->
+<p align="center">
+<img src="https://i.imgur.com/5FjimdN.jpg" alt="RIP"
+</p>
+
+> Please note that development on this project has ceased, due to restrictions to the What.CD API. Until I am explicitly informed by staff that these restrictions have been removed, and development may continue, this repository is for historical purposes. *Please* do not create pull requests for workarounds.
 
 *A Freeleech Torrent Grabber for What.CD*
 ---
